@@ -60,6 +60,7 @@
         <button class="navbtn" data-section="subscriptions">◇ &nbsp; Membresías</button>
         <button class="navbtn" data-section="plans">▧ &nbsp; Planes</button>
         <button class="navbtn" data-section="payments">⇄ &nbsp; Pagos</button>
+        <button class="navbtn" data-section="requests">▤ &nbsp; Solicitudes</button>
         <button class="navbtn" data-section="devices">▤ &nbsp; Dispositivos</button>
         <button class="navbtn" data-section="audit">≡ &nbsp; Auditoría</button>
       </aside>
@@ -99,6 +100,7 @@
     subscriptions: {name:'Membresías', desc:'Planes contratados y estado de las suscripciones.', table:'business_subscriptions'},
     plans: {name:'Planes', desc:'Catálogo de planes, precios y límites configurados para los negocios.', table:'membership_plans'},
     payments: {name:'Pagos', desc:'Solicitudes de pago y resultados de verificación.', table:'membership_payments'},
+    requests: {name:'Solicitudes', desc:'Solicitudes de planes, renovaciones y dispositivos adicionales.', table:'membership_change_requests'},
     devices: {name:'Dispositivos', desc:'Dispositivos vinculados a los negocios.', table:'business_devices'},
     audit: {name:'Auditoría', desc:'Registro de acciones administrativas.', table:'platform_audit_log'}
   };
@@ -200,10 +202,14 @@
     const keys = [...new Set([...preferred.filter(k=>k in rows[0]),...Object.keys(rows[0])])].slice(0,7);
     const canManage = sectionKey === 'businesses' || sectionKey === 'devices';
     const canReviewPayments = sectionKey === 'payments';
-    let out='<table><thead><tr>'+keys.map(k=>'<th>'+cell(k.replaceAll('_',' '))+'</th>').join('')+((canManage || canReviewPayments)?'<th>Acciones</th>':'')+'</tr></thead><tbody>';
+    const canReviewRequests = sectionKey === 'requests';
+    let out='<table><thead><tr>'+keys.map(k=>'<th>'+cell(k.replaceAll('_',' '))+'</th>').join('')+((canManage || canReviewPayments || canReviewRequests)?'<th>Acciones</th>':'')+'</tr></thead><tbody>';
     out += rows.map(row=>{
       let action='';
-      if(canReviewPayments && row.id && row.payment_status === 'submitted') {
+      if(canReviewRequests && row.id && row.status === 'pending') {
+         action='<td><div class="flex items-center gap-2"><select class="field rounded-lg px-2 py-2 text-xs" data-request-decision="'+cell(row.id)+'"><option value="approved">Aprobar</option><option value="rejected">Rechazar</option></select><button class="green rounded-lg px-3 py-2 text-xs font-bold" data-request-save="'+cell(row.id)+'">Guardar</button></div></td>';
+       } else if(canReviewRequests) action='<td class="muted">Revisada</td>';
+       else if(canReviewPayments && row.id && row.payment_status === 'submitted') {
          action='<td><div class="flex items-center gap-2"><select class="field rounded-lg px-2 py-2 text-xs" data-payment-decision="'+cell(row.id)+'"><option value="verified">Aprobar</option><option value="rejected">Rechazar</option><option value="duplicate">Duplicado</option></select><button class="green rounded-lg px-3 py-2 text-xs font-bold" data-payment-save="'+cell(row.id)+'">Guardar</button></div></td>';
        } else if(canReviewPayments) action='<td class="muted">'+(row.payment_status === 'submitted' ? '—' : 'Revisado')+'</td>';
        else if(canManage && row.id && row.status) {
@@ -216,6 +222,23 @@
     }).join('');
     $(target).innerHTML=out+'</tbody></table>';
   }
+  async function saveRequestReview(button) {
+     const id=button.dataset.requestSave;
+     const select=button.parentElement.querySelector('[data-request-decision]');
+     const decision=select?.value;
+     if(!id || !['approved','rejected'].includes(decision)) return;
+     const verb=decision==='approved'?'aprobar':'rechazar';
+     if(!window.confirm('¿Confirmas que deseas '+verb+' esta solicitud?')) return;
+     button.disabled=true;
+     button.textContent='Guardando…';
+     $('dataMessage').textContent='Actualizando solicitud y registrando auditoría…';
+     const {error}=await db.rpc('platform_admin_review_membership_change_request',{p_request_id:id,p_decision:decision});
+     button.disabled=false;
+     button.textContent='Guardar';
+     if(error) { $('dataMessage').textContent='No se pudo revisar la solicitud: '+error.message; return; }
+     $('dataMessage').textContent='Solicitud revisada correctamente.';
+     await loadTable('requests');
+   }
   async function savePaymentReview(button) {
      const id=button.dataset.paymentSave;
      const select=button.parentElement.querySelector('[data-payment-decision]');
@@ -257,6 +280,8 @@
     await loadTable(kind);
   }
   $('tableContent').addEventListener('click',e=>{
+    const requestButton=e.target.closest('[data-request-save]');
+    if(requestButton) { saveRequestReview(requestButton); return; }
     const paymentButton=e.target.closest('[data-payment-save]');
     if(paymentButton) { savePaymentReview(paymentButton); return; }
     const statusButton=e.target.closest('[data-status-save]');
@@ -269,7 +294,10 @@
     $('tableCount').textContent='Últimos 100 registros';
     $('overviewSection').classList.add('hidden');
     $('tableSection').classList.remove('hidden');
-    const {data,error,count} = await db.from(cfg.table).select('*',{count:'exact'}).order('created_at',{ascending:false}).limit(100);
+    const query = key === 'requests'
+      ? db.from(cfg.table).select('*, businesses(business_name), membership_plans(display_name)',{count:'exact'})
+      : db.from(cfg.table).select('*',{count:'exact'});
+    const {data,error,count} = await query.order('created_at',{ascending:false}).limit(100);
     if(error) {
       $('tableContent').innerHTML='<p class="text-rose-300 text-sm p-3">No se pudieron consultar estos datos. Comprueba que la tabla exista y que las políticas RLS permitan el acceso al administrador.</p>';
       $('dataMessage').textContent=error.message;
