@@ -1,0 +1,222 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#0b1110">
+  <title>VerifyTime | Panel Maestro</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    *{font-family:Inter,sans-serif} body{background:#080d0c;color:#e8f0ec}
+    .panel{background:#101916;border:1px solid #20332b}.muted{color:#8ca197}
+    .field{background:#0b1210;border:1px solid #294137;color:#f1f7f3}
+    .field:focus{outline:2px solid #18b66a;outline-offset:1px}
+    .green{background:#18b66a;color:#06140d}.green:hover{background:#22ca79}
+    .navbtn{width:100%;text-align:left;padding:12px 14px;border-radius:12px;color:#a8bbb1}
+    .navbtn.active,.navbtn:hover{background:#183126;color:#55e69a}
+    .metric{background:linear-gradient(145deg,#14221b,#101916);border:1px solid #254233}
+    .tablewrap{overflow:auto} table{width:100%;border-collapse:collapse;min-width:620px} th,td{padding:12px 14px;text-align:left;border-bottom:1px solid #20332b;font-size:13px} th{color:#8ca197;font-weight:600}
+  </style>
+</head>
+<body>
+  <main id="loginView" class="min-h-screen flex items-center justify-center p-5">
+    <section class="panel rounded-3xl p-7 sm:p-9 w-full max-w-md shadow-2xl">
+      <a href="/" class="inline-flex items-center gap-3 mb-8">
+        <span class="w-11 h-11 rounded-2xl bg-emerald-400/10 border border-emerald-400/30 text-emerald-300 grid place-items-center text-2xl">✓</span>
+        <span class="text-xl font-extrabold">Verify<span class="text-emerald-400">Time</span></span>
+      </a>
+      <p class="text-emerald-400 text-xs font-bold tracking-[.2em] uppercase mb-2">Zona restringida</p>
+      <h1 class="text-3xl font-extrabold mb-2">Panel Maestro</h1>
+      <p class="muted text-sm mb-7">Acceso exclusivo para la administración de VerifyTime.</p>
+      <form id="loginForm" class="space-y-4">
+        <label class="block text-sm">Correo electrónico
+          <input id="email" class="field mt-2 w-full rounded-xl px-4 py-3" type="email" autocomplete="username" required value="jhoswantrader@gmail.com">
+        </label>
+        <label class="block text-sm">Contraseña
+          <input id="password" class="field mt-2 w-full rounded-xl px-4 py-3" type="password" autocomplete="current-password" required>
+        </label>
+        <button id="loginButton" class="green w-full rounded-xl py-3 font-bold" type="submit">Iniciar sesión</button>
+      </form>
+      <button id="forgotButton" class="text-emerald-300 text-sm mt-5 hover:underline">¿Olvidaste tu contraseña?</button>
+      <p id="loginMessage" role="status" class="text-sm mt-4 muted"></p>
+      <p class="text-xs muted mt-7 border-t border-emerald-950 pt-5">Este acceso no permite crear cuentas. Solo usuarios autorizados por Supabase pueden entrar.</p>
+    </section>
+  </main>
+
+  <div id="adminView" class="hidden min-h-screen">
+    <header class="h-16 border-b border-emerald-950 bg-[#0c1310] flex items-center justify-between px-5 lg:px-8 sticky top-0 z-20">
+      <a href="/" class="font-extrabold text-lg">Verify<span class="text-emerald-400">Time</span> <span class="muted font-medium text-sm ml-2">/ Maestro</span></a>
+      <div class="flex items-center gap-3"><span id="adminEmail" class="hidden sm:block text-xs muted"></span><button id="logoutButton" class="border border-emerald-900 rounded-lg px-3 py-2 text-sm hover:bg-emerald-950">Cerrar sesión</button></div>
+    </header>
+    <div class="max-w-[1500px] mx-auto p-4 lg:p-7 grid lg:grid-cols-[230px_1fr] gap-6">
+      <aside class="panel rounded-2xl p-3 h-fit">
+        <p class="muted text-[10px] uppercase tracking-[.2em] px-3 py-3">Administración</p>
+        <button class="navbtn active" data-section="overview">▦ &nbsp; Resumen general</button>
+        <button class="navbtn" data-section="businesses">▣ &nbsp; Negocios</button>
+        <button class="navbtn" data-section="subscriptions">◇ &nbsp; Membresías</button>
+        <button class="navbtn" data-section="payments">⇄ &nbsp; Pagos</button>
+        <button class="navbtn" data-section="devices">▤ &nbsp; Dispositivos</button>
+        <button class="navbtn" data-section="audit">≡ &nbsp; Auditoría</button>
+      </aside>
+      <section class="min-w-0">
+        <div class="flex flex-wrap items-end justify-between gap-3 mb-6">
+          <div><p class="text-emerald-400 text-xs font-bold uppercase tracking-[.18em]">Control de plataforma</p><h1 id="sectionTitle" class="text-3xl font-extrabold mt-1">Resumen general</h1><p id="sectionDescription" class="muted text-sm mt-2">Estado actual de los negocios, membresías y operaciones.</p></div>
+          <button id="refreshButton" class="border border-emerald-900 rounded-xl px-4 py-2.5 text-sm hover:bg-emerald-950">↻ Actualizar datos</button>
+        </div>
+        <p id="dataMessage" class="muted text-sm mb-4" role="status"></p>
+        <div id="overviewSection">
+          <div class="grid sm:grid-cols-2 xl:grid-cols-4 gap-4 mb-6">
+            <article class="metric rounded-2xl p-5"><p class="muted text-sm">Negocios registrados</p><p id="countBusinesses" class="text-3xl font-extrabold mt-3">—</p></article>
+            <article class="metric rounded-2xl p-5"><p class="muted text-sm">Dispositivos</p><p id="countDevices" class="text-3xl font-extrabold mt-3">—</p></article>
+            <article class="metric rounded-2xl p-5"><p class="muted text-sm">Membresías</p><p id="countSubscriptions" class="text-3xl font-extrabold mt-3">—</p></article>
+            <article class="metric rounded-2xl p-5"><p class="muted text-sm">Solicitudes de pago</p><p id="countPayments" class="text-3xl font-extrabold mt-3">—</p></article>
+          </div>
+          <div class="panel rounded-2xl p-5"><h2 class="font-bold text-lg mb-1">Actividad de pagos</h2><p class="muted text-sm mb-4">Solicitudes más recientes registradas en la plataforma.</p><div id="recentPayments"></div></div>
+        </div>
+        <div id="tableSection" class="hidden panel rounded-2xl p-4 sm:p-5">
+          <div class="flex items-center justify-between gap-3 mb-4"><h2 id="tableTitle" class="font-bold text-lg"></h2><span id="tableCount" class="muted text-xs"></span></div>
+          <div id="tableContent" class="tablewrap"></div>
+        </div>
+      </section>
+    </div>
+  </div>
+
+<script>
+(() => {
+  const SUPABASE_URL = 'https://fjraksibbtfuhnjsdvtm.supabase.co';
+  const SUPABASE_ANON_KEY = 'sb_publishable_xIyXcg1g7Fjh-VbDLe54Lw_cJvBy7DH';
+  const ADMIN_EMAIL = 'jhoswantrader@gmail.com';
+  const db = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+  const $ = id => document.getElementById(id);
+  const tables = {
+    businesses: {name:'Negocios', desc:'Negocios registrados y su estado.', table:'businesses'},
+    subscriptions: {name:'Membresías', desc:'Planes y estado de las suscripciones.', table:'business_subscriptions'},
+    payments: {name:'Pagos', desc:'Solicitudes de pago y resultados de verificación.', table:'membership_payments'},
+    devices: {name:'Dispositivos', desc:'Dispositivos vinculados a los negocios.', table:'business_devices'},
+    audit: {name:'Auditoría', desc:'Registro de acciones administrativas.', table:'platform_audit_log'}
+  };
+  let currentSection = 'overview';
+  let sessionUser = null;
+
+  function message(text, error=false) {
+    $('loginMessage').textContent = text || '';
+    $('loginMessage').className = 'text-sm mt-4 ' + (error ? 'text-rose-400' : 'text-emerald-300');
+  }
+  function safe(value) {
+    if (value === null || value === undefined) return '—';
+    if (typeof value === 'object') return JSON.stringify(value);
+    return String(value);
+  }
+  function cell(value) {
+    return safe(value).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+  }
+  async function isMaster(user) {
+    if (!user || user.email?.toLowerCase() !== ADMIN_EMAIL) return false;
+    const {data, error} = await db.rpc('is_platform_staff');
+    if (error) {
+      console.error('No se pudo validar is_platform_staff:', error);
+      throw new Error('No se pudo validar el permiso maestro en Supabase. Revisa la función is_platform_staff().');
+    }
+    return data === true;
+  }
+  async function enter(user) {
+    try {
+      const allowed = await isMaster(user);
+      if (!allowed) {
+        await db.auth.signOut();
+        $('adminView').classList.add('hidden');
+        $('loginView').classList.remove('hidden');
+        message('Esta cuenta no tiene autorización de administrador maestro.', true);
+        return;
+      }
+      sessionUser = user;
+      $('adminEmail').textContent = user.email;
+      $('loginView').classList.add('hidden');
+      $('adminView').classList.remove('hidden');
+      await loadOverview();
+    } catch (e) {
+      $('adminView').classList.add('hidden');
+      $('loginView').classList.remove('hidden');
+      message(e.message || 'No fue posible validar el acceso.', true);
+    }
+  }
+  $('loginForm').addEventListener('submit', async e => {
+    e.preventDefault();
+    $('loginButton').disabled = true;
+    $('loginButton').textContent = 'Validando…';
+    message('');
+    const {data,error} = await db.auth.signInWithPassword({email:$('email').value.trim(),password:$('password').value});
+    $('loginButton').disabled = false;
+    $('loginButton').textContent = 'Iniciar sesión';
+    if (error) return message('No se pudo iniciar sesión. Verifica tus datos.', true);
+    await enter(data.user);
+  });
+  $('forgotButton').addEventListener('click', async () => {
+    const email = $('email').value.trim();
+    if (email.toLowerCase() !== ADMIN_EMAIL) return message('Introduce el correo administrador autorizado.', true);
+    const {error} = await db.auth.resetPasswordForEmail(email, {redirectTo:location.origin + '/admin.html'});
+    message(error ? 'No se pudo enviar el enlace de recuperación.' : 'Si la cuenta existe, recibirás un enlace para restablecer la contraseña.', !!error);
+  });
+  $('logoutButton').addEventListener('click', async () => { await db.auth.signOut(); sessionUser=null; $('adminView').classList.add('hidden'); $('loginView').classList.remove('hidden'); $('password').value=''; message('Sesión cerrada.'); });
+  $('refreshButton').addEventListener('click', () => currentSection === 'overview' ? loadOverview() : loadTable(currentSection));
+  async function count(table, id) {
+    const {count,error} = await db.from(table).select('*',{count:'exact',head:true});
+    if (error) { $(id).textContent='—'; console.warn(table,error.message); return; }
+    $(id).textContent = count ?? 0;
+  }
+  async function loadOverview() {
+    $('dataMessage').textContent = 'Consultando Supabase…';
+    await Promise.all([
+      count('businesses','countBusinesses'),
+      count('business_devices','countDevices'),
+      count('business_subscriptions','countSubscriptions'),
+      count('membership_payments','countPayments')
+    ]);
+    const {data,error} = await db.from('membership_payments').select('*').order('created_at',{ascending:false}).limit(8);
+    if (error) {
+      $('recentPayments').innerHTML='<p class="text-amber-300 text-sm">No se pudo leer el historial de pagos. Verifica los permisos RLS.</p>';
+    } else renderTable(data || [], 'recentPayments');
+    $('dataMessage').textContent = 'Datos actualizados: ' + new Date().toLocaleString('es-VE');
+  }
+  function renderTable(rows, target) {
+    if (!rows.length) { $(target).innerHTML='<p class="muted text-sm py-4">No hay registros para mostrar.</p>'; return; }
+    const preferred = ['created_at','business_id','status','bank_reference','amount','currency','plan_id','id'];
+    const keys = [...new Set([...preferred.filter(k=>k in rows[0]),...Object.keys(rows[0])])].slice(0,7);
+    let out='<table><thead><tr>'+keys.map(k=>'<th>'+cell(k.replaceAll('_',' '))+'</th>').join('')+'</tr></thead><tbody>';
+    out += rows.map(row=>'<tr>'+keys.map(k=>'<td>'+cell(row[k])+'</td>').join('')+'</tr>').join('');
+    $(target).innerHTML=out+'</tbody></table>';
+  }
+  async function loadTable(key) {
+    const cfg=tables[key]; if(!cfg) return;
+    $('dataMessage').textContent='Cargando '+cfg.name.toLowerCase()+'…';
+    $('tableTitle').textContent=cfg.name;
+    $('tableCount').textContent='Últimos 100 registros';
+    $('overviewSection').classList.add('hidden');
+    $('tableSection').classList.remove('hidden');
+    const {data,error,count} = await db.from(cfg.table).select('*',{count:'exact'}).order('created_at',{ascending:false}).limit(100);
+    if(error) {
+      $('tableContent').innerHTML='<p class="text-rose-300 text-sm p-3">No se pudieron consultar estos datos. Comprueba que la tabla exista y que las políticas RLS permitan el acceso al administrador.</p>';
+      $('dataMessage').textContent=error.message;
+      return;
+    }
+    $('tableCount').textContent=(count ?? data.length)+' registros';
+    renderTable(data || [],'tableContent');
+    $('dataMessage').textContent='Consulta completada.';
+  }
+  document.querySelectorAll('[data-section]').forEach(btn=>btn.addEventListener('click', async ()=>{
+    currentSection=btn.dataset.section;
+    document.querySelectorAll('[data-section]').forEach(b=>b.classList.toggle('active',b===btn));
+    $('sectionTitle').textContent=currentSection==='overview'?'Resumen general':tables[currentSection].name;
+    $('sectionDescription').textContent=currentSection==='overview'?'Estado actual de los negocios, membresías y operaciones.':tables[currentSection].desc;
+    if(currentSection==='overview'){ $('tableSection').classList.add('hidden'); $('overviewSection').classList.remove('hidden'); await loadOverview(); }
+    else await loadTable(currentSection);
+  }));
+  db.auth.getSession().then(({data})=>{ if(data.session) enter(data.session.user); });
+  db.auth.onAuthStateChange((event,session)=>{ if(event==='SIGNED_OUT'){ $('adminView').classList.add('hidden'); $('loginView').classList.remove('hidden'); } });
+})();
+</script>
+</body>
+</html>
