@@ -191,7 +191,7 @@
     const {data,error} = await db.from('membership_payments').select('*').order('created_at',{ascending:false}).limit(8);
     if (error) {
       $('recentPayments').innerHTML='<p class="text-amber-300 text-sm">No se pudo leer el historial de pagos. Verifica los permisos RLS.</p>';
-    } else renderTable(data || [], 'recentPayments');
+    } else renderTable(data || [], 'recentPayments', 'overview');
     $('dataMessage').textContent = 'Datos actualizados: ' + new Date().toLocaleString('es-VE');
   }
   function renderTable(rows, target, sectionKey = currentSection) {
