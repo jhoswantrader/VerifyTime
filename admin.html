@@ -257,8 +257,10 @@
     await loadTable(kind);
   }
   $('tableContent').addEventListener('click',e=>{
-    const button=e.target.closest('[data-status-save]');
-    if(button) saveAdminStatus(button);
+    const paymentButton=e.target.closest('[data-payment-save]');
+    if(paymentButton) { savePaymentReview(paymentButton); return; }
+    const statusButton=e.target.closest('[data-status-save]');
+    if(statusButton) saveAdminStatus(statusButton);
   });
   async function loadTable(key) {
     const cfg=tables[key]; if(!cfg) return;
