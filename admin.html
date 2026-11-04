@@ -194,14 +194,51 @@
     } else renderTable(data || [], 'recentPayments');
     $('dataMessage').textContent = 'Datos actualizados: ' + new Date().toLocaleString('es-VE');
   }
-  function renderTable(rows, target) {
+  function renderTable(rows, target, sectionKey = currentSection) {
     if (!rows.length) { $(target).innerHTML='<p class="muted text-sm py-4">No hay registros para mostrar.</p>'; return; }
     const preferred = ['created_at','business_id','status','bank_reference','amount','currency','plan_id','id'];
     const keys = [...new Set([...preferred.filter(k=>k in rows[0]),...Object.keys(rows[0])])].slice(0,7);
-    let out='<table><thead><tr>'+keys.map(k=>'<th>'+cell(k.replaceAll('_',' '))+'</th>').join('')+'</tr></thead><tbody>';
-    out += rows.map(row=>'<tr>'+keys.map(k=>'<td>'+cell(row[k])+'</td>').join('')+'</tr>').join('');
+    const canManage = sectionKey === 'businesses' || sectionKey === 'devices';
+    let out='<table><thead><tr>'+keys.map(k=>'<th>'+cell(k.replaceAll('_',' '))+'</th>').join('')+(canManage?'<th>Acciones</th>':'')+'</tr></thead><tbody>';
+    out += rows.map(row=>{
+      let action='';
+      if(canManage && row.id && row.status) {
+        const states = sectionKey === 'businesses'
+          ? ['pending','active','suspended','closed']
+          : ['pending','active','blocked','unlinked'];
+        action='<td><div class="flex items-center gap-2"><select class="field rounded-lg px-2 py-2 text-xs" data-status-select="'+cell(row.id)+'">'+states.map(s=>'<option value="'+s+'"'+(row.status===s?' selected':'')+'>'+s+'</option>').join('')+'</select><button class="green rounded-lg px-3 py-2 text-xs font-bold" data-status-save="'+cell(row.id)+'" data-kind="'+sectionKey+'">Guardar</button></div></td>';
+      } else if(canManage) action='<td class="muted">—</td>';
+      return '<tr>'+keys.map(k=>'<td>'+cell(row[k])+'</td>').join('')+action+'</tr>';
+    }).join('');
     $(target).innerHTML=out+'</tbody></table>';
   }
+  async function saveAdminStatus(button) {
+    const id=button.dataset.statusSave;
+    const kind=button.dataset.kind;
+    const select=button.parentElement.querySelector('[data-status-select]');
+    const status=select?.value;
+    if(!id || !status || !['businesses','devices'].includes(kind)) return;
+    const rpc=kind==='businesses'?'platform_admin_set_business_status':'platform_admin_set_device_status';
+    const args=kind==='businesses'
+      ? {p_business_id:id,p_status:status}
+      : {p_device_id:id,p_status:status};
+    button.disabled=true;
+    button.textContent='Guardando…';
+    $('dataMessage').textContent='Aplicando cambio y registrando auditoría…';
+    const {error}=await db.rpc(rpc,args);
+    button.disabled=false;
+    button.textContent='Guardar';
+    if(error) {
+      $('dataMessage').textContent='No se pudo guardar: '+error.message;
+      return;
+    }
+    $('dataMessage').textContent='Cambio guardado y registrado en auditoría.';
+    await loadTable(kind);
+  }
+  $('tableContent').addEventListener('click',e=>{
+    const button=e.target.closest('[data-status-save]');
+    if(button) saveAdminStatus(button);
+  });
   async function loadTable(key) {
     const cfg=tables[key]; if(!cfg) return;
     $('dataMessage').textContent='Cargando '+cfg.name.toLowerCase()+'…';
