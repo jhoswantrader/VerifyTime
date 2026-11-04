@@ -39,6 +39,7 @@
           <input id="password" class="field mt-2 w-full rounded-xl px-4 py-3" type="password" autocomplete="current-password" required>
         </label>
         <button id="loginButton" class="green w-full rounded-xl py-3 font-bold" type="submit">Iniciar sesión</button>
+        <button id="magicButton" class="w-full rounded-xl py-3 font-semibold border border-emerald-900 text-emerald-200 hover:bg-emerald-950" type="button">Enviar enlace seguro a mi correo</button>
       </form>
       <button id="forgotButton" class="text-emerald-300 text-sm mt-5 hover:underline">¿Olvidaste tu contraseña?</button>
       <p id="loginMessage" role="status" class="text-sm mt-4 muted"></p>
@@ -153,6 +154,14 @@
     $('loginButton').textContent = 'Iniciar sesión';
     if (error) return message('No se pudo iniciar sesión. Verifica tus datos.', true);
     await enter(data.user);
+  });
+  $('magicButton').addEventListener('click', async () => {
+    const email = $('email').value.trim();
+    if (email.toLowerCase() !== ADMIN_EMAIL) return message('Este acceso está reservado al correo administrador.', true);
+    $('magicButton').disabled = true;
+    const {error} = await db.auth.signInWithOtp({email, options:{emailRedirectTo:location.origin + '/admin.html', shouldCreateUser:false}});
+    $('magicButton').disabled = false;
+    message(error ? 'No se pudo enviar el enlace de acceso. Revisa la configuración de correo de Supabase.' : 'Enlace de acceso enviado. Revisa la bandeja de entrada del correo administrador.', !!error);
   });
   $('forgotButton').addEventListener('click', async () => {
     const email = $('email').value.trim();
