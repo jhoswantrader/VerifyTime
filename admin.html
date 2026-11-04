@@ -196,13 +196,17 @@
   }
   function renderTable(rows, target, sectionKey = currentSection) {
     if (!rows.length) { $(target).innerHTML='<p class="muted text-sm py-4">No hay registros para mostrar.</p>'; return; }
-    const preferred = ['created_at','business_id','status','bank_reference','amount','currency','plan_id','id'];
+    const preferred = ['created_at','business_id','payment_status','status','bank_reference','amount','currency','plan_id','id'];
     const keys = [...new Set([...preferred.filter(k=>k in rows[0]),...Object.keys(rows[0])])].slice(0,7);
     const canManage = sectionKey === 'businesses' || sectionKey === 'devices';
-    let out='<table><thead><tr>'+keys.map(k=>'<th>'+cell(k.replaceAll('_',' '))+'</th>').join('')+(canManage?'<th>Acciones</th>':'')+'</tr></thead><tbody>';
+    const canReviewPayments = sectionKey === 'payments';
+    let out='<table><thead><tr>'+keys.map(k=>'<th>'+cell(k.replaceAll('_',' '))+'</th>').join('')+((canManage || canReviewPayments)?'<th>Acciones</th>':'')+'</tr></thead><tbody>';
     out += rows.map(row=>{
       let action='';
-      if(canManage && row.id && row.status) {
+      if(canReviewPayments && row.id && row.payment_status === 'submitted') {
+         action='<td><div class="flex items-center gap-2"><select class="field rounded-lg px-2 py-2 text-xs" data-payment-decision="'+cell(row.id)+'"><option value="verified">Aprobar</option><option value="rejected">Rechazar</option><option value="duplicate">Duplicado</option></select><button class="green rounded-lg px-3 py-2 text-xs font-bold" data-payment-save="'+cell(row.id)+'">Guardar</button></div></td>';
+       } else if(canReviewPayments) action='<td class="muted">'+(row.payment_status === 'submitted' ? '—' : 'Revisado')+'</td>';
+       else if(canManage && row.id && row.status) {
         const states = sectionKey === 'businesses'
           ? ['pending','active','suspended','closed']
           : ['pending','active','blocked','unlinked'];
@@ -212,7 +216,24 @@
     }).join('');
     $(target).innerHTML=out+'</tbody></table>';
   }
-  async function saveAdminStatus(button) {
+  async function savePaymentReview(button) {
+     const id=button.dataset.paymentSave;
+     const select=button.parentElement.querySelector('[data-payment-decision]');
+     const decision=select?.value;
+     if(!id || !['verified','rejected','duplicate'].includes(decision)) return;
+     if(decision==='verified' && !window.confirm('¿Confirmas que verificaste este pago en la fuente bancaria?')) return;
+     button.disabled=true;
+     button.textContent='Guardando…';
+     $('dataMessage').textContent='Revisando pago y actualizando membresía…';
+     const {error}=await db.rpc('platform_admin_review_membership_payment',{p_payment_id:id,p_decision:decision});
+     button.disabled=false;
+     button.textContent='Guardar';
+     if(error) { $('dataMessage').textContent='No se pudo revisar el pago: '+error.message; return; }
+     $('dataMessage').textContent='Pago revisado y acción registrada en auditoría.';
+     await loadTable('payments');
+     await loadOverview();
+   }
+   async function saveAdminStatus(button) {
     const id=button.dataset.statusSave;
     const kind=button.dataset.kind;
     const select=button.parentElement.querySelector('[data-status-select]');
