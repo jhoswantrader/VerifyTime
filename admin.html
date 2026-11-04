@@ -58,6 +58,7 @@
         <button class="navbtn active" data-section="overview">▦ &nbsp; Resumen general</button>
         <button class="navbtn" data-section="businesses">▣ &nbsp; Negocios</button>
         <button class="navbtn" data-section="subscriptions">◇ &nbsp; Membresías</button>
+        <button class="navbtn" data-section="plans">▧ &nbsp; Planes</button>
         <button class="navbtn" data-section="payments">⇄ &nbsp; Pagos</button>
         <button class="navbtn" data-section="devices">▤ &nbsp; Dispositivos</button>
         <button class="navbtn" data-section="audit">≡ &nbsp; Auditoría</button>
@@ -74,6 +75,7 @@
             <article class="metric rounded-2xl p-5"><p class="muted text-sm">Dispositivos</p><p id="countDevices" class="text-3xl font-extrabold mt-3">—</p></article>
             <article class="metric rounded-2xl p-5"><p class="muted text-sm">Membresías</p><p id="countSubscriptions" class="text-3xl font-extrabold mt-3">—</p></article>
             <article class="metric rounded-2xl p-5"><p class="muted text-sm">Solicitudes de pago</p><p id="countPayments" class="text-3xl font-extrabold mt-3">—</p></article>
+            <article class="metric rounded-2xl p-5"><p class="muted text-sm">Planes configurados</p><p id="countPlans" class="text-3xl font-extrabold mt-3">—</p></article>
           </div>
           <div class="panel rounded-2xl p-5"><h2 class="font-bold text-lg mb-1">Actividad de pagos</h2><p class="muted text-sm mb-4">Solicitudes más recientes registradas en la plataforma.</p><div id="recentPayments"></div></div>
         </div>
@@ -94,7 +96,8 @@
   const $ = id => document.getElementById(id);
   const tables = {
     businesses: {name:'Negocios', desc:'Negocios registrados y su estado.', table:'businesses'},
-    subscriptions: {name:'Membresías', desc:'Planes y estado de las suscripciones.', table:'business_subscriptions'},
+    subscriptions: {name:'Membresías', desc:'Planes contratados y estado de las suscripciones.', table:'business_subscriptions'},
+    plans: {name:'Planes', desc:'Catálogo de planes, precios y límites configurados para los negocios.', table:'membership_plans'},
     payments: {name:'Pagos', desc:'Solicitudes de pago y resultados de verificación.', table:'membership_payments'},
     devices: {name:'Dispositivos', desc:'Dispositivos vinculados a los negocios.', table:'business_devices'},
     audit: {name:'Auditoría', desc:'Registro de acciones administrativas.', table:'platform_audit_log'}
@@ -182,7 +185,8 @@
       count('businesses','countBusinesses'),
       count('business_devices','countDevices'),
       count('business_subscriptions','countSubscriptions'),
-      count('membership_payments','countPayments')
+      count('membership_payments','countPayments'),
+      count('membership_plans','countPlans')
     ]);
     const {data,error} = await db.from('membership_payments').select('*').order('created_at',{ascending:false}).limit(8);
     if (error) {
