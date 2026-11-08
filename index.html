@@ -3,7 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>VerifyTime - Automatiza y Verifica tus Pagos Móviles BDV</title>
+    <title>VerifyTime - Verifica pagos móviles BDV y BNC</title>
+    <meta name="description" content="VerifyTime ayuda a comercios a consultar referencias de pagos móviles y organizar el cuadre de caja con Banco de Venezuela (BDV) y Banco Nacional de Crédito (BNC).">
     <!-- Tailwind CSS CDN -->
     <script src="https://cdn.tailwindcss.com"></script>
     <!-- Google Fonts: Inter -->
@@ -111,13 +112,7 @@
                 <a href="#privacidad" class="hover:text-brand-accent transition-colors">Privacidad</a>
             </nav>
 
-            <!-- Botón CTA -->
-            <div class="hidden md:flex items-center gap-4">
-                <a href="#descargar" class="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-gradient-to-r from-brand-600 to-brand-500 hover:from-brand-500 hover:to-brand-accent text-slate-950 font-semibold text-sm shadow-neon transition-all duration-300 hover:scale-[1.02]">
-                    <i data-lucide="download" class="w-4 h-4"></i>
-                    <span>Descargar App</span>
-                </a>
-            </div>
+            <!-- Descarga temporalmente oculta mientras se prepara la siguiente publicación -->
 
             <!-- Botón Menú Móvil -->
             <button id="mobile-menu-btn" class="md:hidden p-2 rounded-lg text-slate-400 hover:text-white hover:bg-slate-800 focus:outline-none">
@@ -132,7 +127,7 @@
             <a href="#planes" class="block px-3 py-2 rounded-md text-base font-medium text-slate-300 hover:text-white hover:bg-slate-800">Planes</a>
             <a href="#seguridad" class="block px-3 py-2 rounded-md text-base font-medium text-slate-300 hover:text-white hover:bg-slate-800">Seguridad</a>
             <a href="#privacidad" class="block px-3 py-2 rounded-md text-base font-medium text-slate-300 hover:text-white hover:bg-slate-800">Privacidad</a>
-            <a href="#descargar" class="block w-full text-center mt-4 px-5 py-3 rounded-xl bg-brand-accent text-slate-950 font-bold">Descargar Ahora</a>
+            <a href="#planes" class="block w-full text-center mt-4 px-5 py-3 rounded-xl border border-brand-500/40 text-brand-accent font-bold">Ver planes</a>
         </div>
     </header>
 
@@ -148,7 +143,7 @@
                 <div class="lg:col-span-7 text-center lg:text-left">
                     <div class="inline-flex items-center gap-2 px-4 py-2 rounded-full glass-card border-brand-500/30 text-brand-accent text-xs sm:text-sm font-medium mb-6 animate-pulse">
                         <i data-lucide="zap" class="w-4 h-4"></i>
-                        <span>Integración con Banco de Venezuela</span>
+                        <span>Compatible con BDV y BNC</span>
                     </div>
 
                     <h1 class="text-4xl sm:text-5xl lg:text-6xl font-extrabold tracking-tight leading-tight mb-6">
@@ -156,26 +151,18 @@
                     </h1>
 
                     <p class="text-lg sm:text-xl text-slate-300 mb-8 max-w-2xl mx-auto lg:mx-0 font-normal leading-relaxed">
-                        Automatiza la consulta de tu Pago Móvil BDV. Revisa y confirma tus cobros en <strong>solo 12 segundos</strong> directamente con el banco y lleva el cuadre de caja de tu negocio sin errores.
+                        Consulta referencias de pagos móviles y organiza el cuadre de caja desde tu teléfono. VerifyTime incorpora conexión con el <strong>Banco de Venezuela (BDV)</strong> y el <strong>Banco Nacional de Crédito (BNC)</strong>, con selección de banco según la cuenta que estés utilizando.
                     </p>
 
-                    <!-- Botones de Descarga -->
-                    <div id="descargar" class="flex flex-col sm:flex-row items-center justify-center lg:justify-start gap-4 mb-10">
-                        <a href="https://shrinkme.click/GPLD1" target="_blank" rel="noopener noreferrer" class="w-full sm:w-auto px-6 py-3.5 rounded-xl bg-slate-900 border border-slate-700 hover:border-brand-400 flex items-center justify-center gap-3 hover:shadow-neon transition-all group">
-                            <!-- Logo vectorial de Google Drive -->
-                            <svg class="w-7 h-7 text-brand-accent group-hover:scale-105 transition-transform" viewBox="0 0 87.3 78" fill="currentColor">
-                                <path d="M6.6 66.85l3.85 6.65c.8 1.4 1.95 2.5 3.3 3.3l13.75-23.8H0c0 1.55.4 3.1 1.2 4.5l5.4 9.35z" fill="#0066DA"/>
-                                <path d="M43.65 25L29.9 1.2C28.5.4 26.95 0 25.4 0H18.3c-1.55 0-3.1.4-4.5 1.2L0 25h43.65z" fill="#00AC47"/>
-                                <path d="M73.55 76.8c1.35-.8 2.5-1.9 3.3-3.3l1.8-3.15 7.45-12.9c.8-1.4 1.2-2.95 1.2-4.5H43.65l13.75 23.85h16.15z" fill="#EA4335"/>
-                                <path d="M43.65 25L29.9 1.2c-1.4.8-2.5 1.95-3.3 3.3L1.2 51.35c-.8 1.4-1.2 2.95-1.2 4.5h43.65V25z" fill="#00832D"/>
-                                <path d="M43.65 25H87.3c0-1.55-.4-3.1-1.2-4.5l-12.9-22.3c-.8-1.4-1.95-2.5-3.3-3.3L43.65 25z" fill="#FFBA00"/>
-                                <path d="M73.55 76.8h-46l13.75-23.8H87.3c0 1.55-.4 3.1-1.2 4.5l-12.55 21.75z" fill="#2684FC"/>
-                            </svg>
-                            <div class="text-left">
-                                <p class="text-[10px] text-slate-400 uppercase tracking-wider font-semibold">Descargar desde</p>
-                                <p class="text-sm font-bold text-white group-hover:text-brand-accent transition-colors">Google Drive</p>
+                    <!-- Aviso temporal de disponibilidad -->
+                    <div id="descargar" class="mb-10 max-w-xl mx-auto lg:mx-0 rounded-2xl border border-brand-500/30 bg-brand-card/70 p-5 text-left">
+                        <div class="flex items-start gap-3">
+                            <i data-lucide="clock-3" class="w-5 h-5 text-brand-accent shrink-0 mt-0.5"></i>
+                            <div>
+                                <p class="font-bold text-white mb-1">Descarga temporalmente no disponible</p>
+                                <p class="text-sm text-slate-400 leading-relaxed">Estamos preparando la siguiente publicación de VerifyTime. Por ahora, el botón de descarga está oculto. Puedes consultar las funciones y los planes disponibles en esta página.</p>
                             </div>
-                        </a>
+                        </div>
                     </div>
 
                     <!-- Métricas -->
@@ -265,183 +252,99 @@
     <section id="funciones" class="py-20 bg-slate-950/60 border-y border-slate-800/50 relative">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="text-center max-w-3xl mx-auto mb-16">
-                <h2 class="text-xs font-bold text-brand-accent uppercase tracking-widest mb-3">Diseñado para el comercio venezolano</h2>
-                <p class="text-3xl sm:text-4xl font-extrabold text-white tracking-tight">
-                    Dile adiós al caos de la verificación manual
-                </p>
-                <p class="text-slate-400 mt-4 text-base sm:text-lg">
-                    VerifyTime reemplaza el proceso lento, propenso a fraudes y tedioso de validar pagos móviles uno por uno.
-                </p>
+                <h2 class="text-xs font-bold text-brand-accent uppercase tracking-widest mb-3">Herramientas para comercios</h2>
+                <p class="text-3xl sm:text-4xl font-extrabold text-white tracking-tight">Más control de tus pagos y tu caja</p>
+                <p class="text-slate-400 mt-4 text-base sm:text-lg">VerifyTime reúne la consulta de referencias y el control de caja en una sola aplicación, con selección de banco para trabajar con la cuenta correcta.</p>
             </div>
-
-            <div class="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
+            <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
                 <div class="glass-card rounded-2xl p-6 transition-all duration-300 hover:-translate-y-1">
-                    <div class="w-12 h-12 rounded-xl bg-red-500/10 border border-red-500/20 text-red-400 flex items-center justify-center mb-5">
-                        <i data-lucide="message-square-off" class="w-6 h-6"></i>
-                    </div>
-                    <h3 class="text-lg font-bold text-white mb-2">Olvídate del WhatsApp</h3>
-                    <p class="text-slate-400 text-sm leading-relaxed">
-                        No más capturas falsas editadas enviadas por chats. No te fíes de las capturas del cliente; verifica directamente con el banco.
-                    </p>
+                    <div class="w-12 h-12 rounded-xl bg-brand-500/10 border border-brand-500/20 text-brand-accent flex items-center justify-center mb-5"><i data-lucide="landmark" class="w-6 h-6"></i></div>
+                    <h3 class="text-lg font-bold text-white mb-2">Banco de Venezuela (BDV)</h3>
+                    <p class="text-slate-400 text-sm leading-relaxed">Consulta referencias de Pago Móvil con los movimientos disponibles de tu cuenta BDV y comprueba los datos antes de entregar un pedido.</p>
                 </div>
-
+                <div class="glass-card rounded-2xl p-6 transition-all duration-300 hover:-translate-y-1 border border-brand-500/30">
+                    <div class="w-12 h-12 rounded-xl bg-brand-500/10 border border-brand-500/20 text-brand-accent flex items-center justify-center mb-5"><i data-lucide="building-2" class="w-6 h-6"></i></div>
+                    <h3 class="text-lg font-bold text-white mb-2">Banco Nacional de Crédito (BNC)</h3>
+                    <p class="text-slate-400 text-sm leading-relaxed">También funciona con BNC. La aplicación permite elegir BNC como banco, acceder a la banca en línea, consultar la sección <strong class="text-slate-200">Movimientos</strong> y buscar la referencia del pago entre las operaciones disponibles. La consulta depende de la disponibilidad del portal bancario.</p>
+                </div>
                 <div class="glass-card rounded-2xl p-6 transition-all duration-300 hover:-translate-y-1">
-                    <div class="w-12 h-12 rounded-xl bg-brand-500/10 border border-brand-500/20 text-brand-accent flex items-center justify-center mb-5">
-                        <i data-lucide="zap" class="w-6 h-6"></i>
-                    </div>
-                    <h3 class="text-lg font-bold text-white mb-2">Validación en 12s</h3>
-                    <p class="text-slate-400 text-sm leading-relaxed">
-                        Solo ingresa los últimos 6 dígitos de la referencia. La app consulta el estado real en el Banco de Venezuela al instante.
-                    </p>
+                    <div class="w-12 h-12 rounded-xl bg-brand-500/10 border border-brand-500/20 text-brand-accent flex items-center justify-center mb-5"><i data-lucide="search-check" class="w-6 h-6"></i></div>
+                    <h3 class="text-lg font-bold text-white mb-2">Búsqueda por referencia</h3>
+                    <p class="text-slate-400 text-sm leading-relaxed">Introduce la referencia del pago para localizar la operación en los movimientos consultados. Verifica siempre el monto, la fecha y los datos de la operación.</p>
                 </div>
-
                 <div class="glass-card rounded-2xl p-6 transition-all duration-300 hover:-translate-y-1">
-                    <div class="w-12 h-12 rounded-xl bg-brand-500/10 border border-brand-500/20 text-brand-accent flex items-center justify-center mb-5">
-                        <i data-lucide="calculator" class="w-6 h-6"></i>
-                    </div>
-                    <h3 class="text-lg font-bold text-white mb-2">Suma Automática</h3>
-                    <p class="text-slate-400 text-sm leading-relaxed">
-                        Cada transacción confirmada se suma de inmediato al total del día. Olvídate de calcular uno a uno al cerrar el turno.
-                    </p>
+                    <div class="w-12 h-12 rounded-xl bg-brand-500/10 border border-brand-500/20 text-brand-accent flex items-center justify-center mb-5"><i data-lucide="calculator" class="w-6 h-6"></i></div>
+                    <h3 class="text-lg font-bold text-white mb-2">Cuadre de caja</h3>
+                    <p class="text-slate-400 text-sm leading-relaxed">Consulta los movimientos del banco seleccionado y lleva un mejor control de los pagos recibidos y de los totales de tu jornada.</p>
                 </div>
-
                 <div class="glass-card rounded-2xl p-6 transition-all duration-300 hover:-translate-y-1">
-                    <div class="w-12 h-12 rounded-xl bg-brand-500/10 border border-brand-500/20 text-brand-accent flex items-center justify-center mb-5">
-                        <i data-lucide="check-check" class="w-4 h-6 w-6"></i>
-                    </div>
-                    <h3 class="text-lg font-bold text-white mb-2">Cuadre Sin Fallas</h3>
-                    <p class="text-slate-400 text-sm leading-relaxed">
-                        Genera un reporte diario que coincide exactamente con el saldo reportado en tu cuenta del Banco de Venezuela.
-                    </p>
+                    <div class="w-12 h-12 rounded-xl bg-brand-500/10 border border-brand-500/20 text-brand-accent flex items-center justify-center mb-5"><i data-lucide="repeat-2" class="w-6 h-6"></i></div>
+                    <h3 class="text-lg font-bold text-white mb-2">Selector de banco</h3>
+                    <p class="text-slate-400 text-sm leading-relaxed">Elige BDV o BNC desde Inicio y también en Cuadre de caja para mantener visible la cuenta y los movimientos que deseas consultar.</p>
                 </div>
+                <div class="glass-card rounded-2xl p-6 transition-all duration-300 hover:-translate-y-1">
+                    <div class="w-12 h-12 rounded-xl bg-brand-500/10 border border-brand-500/20 text-brand-accent flex items-center justify-center mb-5"><i data-lucide="shield-check" class="w-6 h-6"></i></div>
+                    <h3 class="text-lg font-bold text-white mb-2">Control y privacidad</h3>
+                    <p class="text-slate-400 text-sm leading-relaxed">Las credenciales se administran en el dispositivo. Mantén tu teléfono protegido y no compartas tus claves; VerifyTime es independiente de las entidades bancarias.</p>
+                </div>
+            </div>
+            <div class="mt-8 rounded-2xl border border-slate-800 bg-slate-900/70 p-5 text-sm text-slate-400 leading-relaxed">
+                <strong class="text-white">Importante:</strong> VerifyTime no es una aplicación oficial de BDV ni de BNC. La disponibilidad, los tiempos de respuesta y la información visible dependen de cada portal bancario y de la conexión a Internet. Confirma la operación en el canal oficial antes de entregar productos o servicios.
             </div>
         </div>
     </section>
- <!-- Nueva Sección: Planes y Membresías -->
+
+    <!-- Planes y Membresías actualizados -->
     <section id="planes" class="py-24 relative overflow-hidden bg-grid-pattern">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
             <div class="text-center max-w-3xl mx-auto mb-12">
                 <h2 class="text-xs font-bold text-brand-accent uppercase tracking-widest mb-3">Suscripciones y Membresías</h2>
-                <p class="text-3xl sm:text-4xl font-extrabold text-white tracking-tight">
-                    Planes diseñados a la medida de tu negocio
-                </p>
-                <p class="text-slate-400 mt-4 text-base sm:text-lg">
-                    Prueba la versión gratuita o impulsa la eficiencia de tu comercio con nuestros planes ilimitados.
-                </p>
+                <p class="text-3xl sm:text-4xl font-extrabold text-white tracking-tight">Un plan para cada tamaño de negocio</p>
+                <p class="text-slate-400 mt-4 text-base sm:text-lg">Elige la cantidad de dispositivos que necesitas para consultar pagos y organizar la caja de tu comercio.</p>
             </div>
-
-            <!-- Grid de Tarjetas de Precio -->
             <div class="grid md:grid-cols-3 gap-8 items-stretch max-w-6xl mx-auto">
-                
-                <!-- Plan Gratuito / Básico 
                 <div class="glass-card rounded-3xl p-8 flex flex-col justify-between transition-all duration-300 hover:-translate-y-2">
                     <div>
-                        <div class="flex items-center justify-between mb-4">
-                            <span class="text-sm font-bold text-slate-300 uppercase tracking-wider">Plan Gratuito</span>
-                            <span class="px-3 py-1 rounded-full text-xs font-bold bg-slate-800 text-slate-300">Prueba</span>
-                        </div>
-                        <p class="text-slate-400 text-xs mb-6">Ideal para emprendedores y pequeños negocios que están comenzando.</p>
-                        <div class="flex items-baseline gap-1 mb-6">
-                            <span class="text-4xl font-extrabold text-white">$0</span>
-                            <span class="text-slate-400 text-xs">/ para siempre</span>
-                        </div>
+                        <div class="flex items-center justify-between mb-4"><span class="text-sm font-bold text-slate-300 uppercase tracking-wider">Emprendedor</span><span class="px-3 py-1 rounded-full text-xs font-bold bg-slate-800 text-slate-300">1 dispositivo</span></div>
+                        <p class="text-slate-400 text-xs mb-6">Para emprendedores y comercios que administran sus pagos desde un solo teléfono.</p>
+                        <div class="flex items-baseline gap-1 mb-6"><span class="text-4xl font-extrabold text-white">$4.99</span><span class="text-slate-400 text-xs">/ mes</span></div>
                         <ul class="space-y-4 text-xs sm:text-sm text-slate-300 mb-8">
-                            <li class="flex items-center gap-3">
-                                <i data-lucide="check" class="w-4 h-4 text-brand-accent shrink-0"></i>
-                                <span>Hasta 15 consultas diarias</span>
-                            </li>
-                            <li class="flex items-center gap-3">
-                                <i data-lucide="check" class="w-4 h-4 text-brand-accent shrink-0"></i>
-                                <span>Verificación en 12 segundos</span>
-                            </li>
-                            <li class="flex items-center gap-3">
-                                <i data-lucide="check" class="w-4 h-4 text-brand-accent shrink-0"></i>
-                                <span>Encriptación local de clave</span>
-                            </li>
-                            <li class="flex items-center gap-3 text-slate-500">
-                                <i data-lucide="x" class="w-4 h-4 shrink-0"></i>
-                                <span>Suma total automática acumulada</span>
-                            </li>
+                            <li class="flex items-center gap-3"><i data-lucide="check" class="w-4 h-4 text-brand-accent shrink-0"></i><span>Consulta de pagos BDV y BNC</span></li>
+                            <li class="flex items-center gap-3"><i data-lucide="check" class="w-4 h-4 text-brand-accent shrink-0"></i><span>Búsqueda por referencia</span></li>
+                            <li class="flex items-center gap-3"><i data-lucide="check" class="w-4 h-4 text-brand-accent shrink-0"></i><span>Control y cuadre de caja</span></li>
                         </ul>
                     </div>
-                    <a href="#descargar" class="w-full py-3.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-white font-bold text-xs text-center transition">
-                        Comenzar Gratis
-                    </a>
+                    <a href="https://wa.me/qr/MLLHZPVMQLIOD1" target="_blank" rel="noopener noreferrer" class="w-full py-3.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-white font-bold text-xs text-center transition">Consultar plan</a>
                 </div>
-                -->
-
-                <!-- Plan Pro / Recomendado -->
-                <div class="glass-card rounded-3xl p-8 flex flex-col justify-between relative border-2 border-brand-500/60 bg-brand-card/90 shadow-neon-lg transform scale-105">
-                    <div class="absolute -top-3.5 left-1/2 -translate-x-1/2 px-4 py-1 rounded-full bg-brand-accent text-slate-950 font-black text-[11px] uppercase tracking-wider shadow-md">
-                        Membresía Más Popular
-                    </div>
+                <div class="glass-card rounded-3xl p-8 flex flex-col justify-between relative border-2 border-brand-500/60 bg-brand-card/90 shadow-neon-lg">
+                    <div class="absolute -top-3.5 left-1/2 -translate-x-1/2 px-4 py-1 rounded-full bg-brand-accent text-slate-950 font-black text-[11px] uppercase tracking-wider shadow-md">Más elegido</div>
                     <div>
-                        <div class="flex items-center justify-between mb-4 mt-2">
-                            <span class="text-sm font-bold text-brand-accent uppercase tracking-wider">Plan Emprendedor</span>
-                            <span class="px-3 py-1 rounded-full text-xs font-bold bg-brand-500/20 text-brand-accent border border-brand-500/30">Ilimitado</span>
-                        </div>
-                        <p class="text-slate-300 text-xs mb-6">Para tiendas y comercios que reciben múltiples pagos móviles al día.</p>
-                        <div class="flex items-baseline gap-1 mb-6">
-                            <span class="text-4xl font-extrabold text-white">$5.99</span>
-                            <span class="text-slate-400 text-xs">/ mes</span>
-                        </div>
+                        <div class="flex items-center justify-between mb-4 mt-2"><span class="text-sm font-bold text-brand-accent uppercase tracking-wider">Comerciante</span><span class="px-3 py-1 rounded-full text-xs font-bold bg-brand-500/20 text-brand-accent border border-brand-500/30">2 dispositivos</span></div>
+                        <p class="text-slate-300 text-xs mb-6">Para negocios que necesitan utilizar VerifyTime en más de un dispositivo autorizado.</p>
+                        <div class="flex items-baseline gap-1 mb-6"><span class="text-4xl font-extrabold text-white">$8.99</span><span class="text-slate-400 text-xs">/ mes</span></div>
                         <ul class="space-y-4 text-xs sm:text-sm text-slate-200 mb-8">
-                            <li class="flex items-center gap-3">
-                                <i data-lucide="check-circle-2" class="w-4 h-4 text-brand-accent shrink-0"></i>
-                                <strong class="text-white">Consultas Ilimitadas 24/7</strong>
-                            </li>
-                            <li class="flex items-center gap-3">
-                                <i data-lucide="check-circle-2" class="w-4 h-4 text-brand-accent shrink-0"></i>
-                                <span>Suma de totales en tiempo real</span>
-                            </li>
-                            <li class="flex items-center gap-3">
-                                <i data-lucide="check-circle-2" class="w-4 h-4 text-brand-accent shrink-0"></i>
-                                <span>Reporte diario para cuadre de caja</span>
-                            </li>
-                            <li class="flex items-center gap-3">
-                                <i data-lucide="check-circle-2" class="w-4 h-4 text-brand-accent shrink-0"></i>
-                                <span>Soporte prioritario WhatsApp</span>
-                            </li>
+                            <li class="flex items-center gap-3"><i data-lucide="check-circle-2" class="w-4 h-4 text-brand-accent shrink-0"></i><span>Todo lo incluido en Emprendedor</span></li>
+                            <li class="flex items-center gap-3"><i data-lucide="check-circle-2" class="w-4 h-4 text-brand-accent shrink-0"></i><span>Hasta 2 dispositivos por negocio</span></li>
+                            <li class="flex items-center gap-3"><i data-lucide="check-circle-2" class="w-4 h-4 text-brand-accent shrink-0"></i><span>Consulta de movimientos BDV y BNC</span></li>
                         </ul>
                     </div>
-                    <a href="https://wa.me/qr/MLLHZPVMQLIOD1" class="w-full py-3.5 rounded-xl bg-brand-accent hover:brightness-110 text-slate-950 font-black text-xs text-center transition shadow-neon">
-                        Obtener Membresía Emprendedor
-                    </a>
+                    <a href="https://wa.me/qr/MLLHZPVMQLIOD1" target="_blank" rel="noopener noreferrer" class="w-full py-3.5 rounded-xl bg-brand-accent hover:brightness-110 text-slate-950 font-black text-xs text-center transition shadow-neon">Consultar plan</a>
                 </div>
-
-                <!-- Plan Comercial / Anual -->
                 <div class="glass-card rounded-3xl p-8 flex flex-col justify-between transition-all duration-300 hover:-translate-y-2">
                     <div>
-                        <div class="flex items-center justify-between mb-4">
-                            <span class="text-sm font-bold text-slate-300 uppercase tracking-wider">Plan Anual</span>
-                            <span class="px-3 py-1 rounded-full text-xs font-bold bg-emerald-500/20 text-emerald-400">Ahorra 30%</span>
-                        </div>
-                        <p class="text-slate-400 text-xs mb-6">La mejor opción para negocios consolidados que buscan el máximo ahorro.</p>
-                        <div class="flex items-baseline gap-1 mb-6">
-                            <span class="text-4xl font-extrabold text-white">$50 </span>
-                            <span class="text-slate-400 text-xs">/ año</span>
-                        </div>
+                        <div class="flex items-center justify-between mb-4"><span class="text-sm font-bold text-slate-300 uppercase tracking-wider">Market Plus</span><span class="px-3 py-1 rounded-full text-xs font-bold bg-emerald-500/20 text-emerald-400">4 dispositivos</span></div>
+                        <p class="text-slate-400 text-xs mb-6">Pensado para minimarkets y equipos con varios puestos de trabajo.</p>
+                        <div class="flex items-baseline gap-1 mb-6"><span class="text-4xl font-extrabold text-white">$12.99</span><span class="text-slate-400 text-xs">/ mes</span></div>
                         <ul class="space-y-4 text-xs sm:text-sm text-slate-300 mb-8">
-                            <li class="flex items-center gap-3">
-                                <i data-lucide="check" class="w-4 h-4 text-brand-accent shrink-0"></i>
-                                <span>Todo lo del Plan Emprendedor</span>
-                            </li>
-                            <li class="flex items-center gap-3">
-                                <i data-lucide="check" class="w-4 h-4 text-brand-accent shrink-0"></i>
-                                <span>Multiusuario para tus cajeros</span>
-                            </li>
-                            <li class="flex items-center gap-3">
-                                <i data-lucide="check" class="w-4 h-4 text-brand-accent shrink-0"></i>
-                                <span>Garantía de servicio continuo y Atencion Por Whatsapp prioritaria</span>
-                            </li>
+                            <li class="flex items-center gap-3"><i data-lucide="check" class="w-4 h-4 text-brand-accent shrink-0"></i><span>Todo lo incluido en Comerciante</span></li>
+                            <li class="flex items-center gap-3"><i data-lucide="check" class="w-4 h-4 text-brand-accent shrink-0"></i><span>Hasta 4 dispositivos por negocio</span></li>
+                            <li class="flex items-center gap-3"><i data-lucide="check" class="w-4 h-4 text-brand-accent shrink-0"></i><span>Opción de consultar ampliación de dispositivos</span></li>
                         </ul>
                     </div>
-                    <a href="https://wa.me/qr/MLLHZPVMQLIOD1" class="w-full py-3.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-white font-bold text-xs text-center transition">
-                        Suscribirme por 1 Año
-                    </a>
+                    <a href="https://wa.me/qr/MLLHZPVMQLIOD1" target="_blank" rel="noopener noreferrer" class="w-full py-3.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-white font-bold text-xs text-center transition">Consultar plan</a>
                 </div>
-
             </div>
+            <p class="text-center text-xs text-slate-500 mt-8">Precios expresados en USD por mes. La activación y las condiciones de membresía se confirman mediante los canales de VerifyTime.</p>
         </div>
     </section>
 
