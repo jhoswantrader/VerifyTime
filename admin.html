@@ -84,6 +84,8 @@
             <article class="metric rounded-2xl p-5"><p class="muted text-sm">Membresías</p><p id="countSubscriptions" class="text-3xl font-extrabold mt-3">—</p></article>
             <article class="metric rounded-2xl p-5"><p class="muted text-sm">Solicitudes de pago</p><p id="countPayments" class="text-3xl font-extrabold mt-3">—</p></article>
             <article class="metric rounded-2xl p-5"><p class="muted text-sm">Planes configurados</p><p id="countPlans" class="text-3xl font-extrabold mt-3">—</p></article>
+            <article class="metric rounded-2xl p-5"><p class="muted text-sm">Proveedores</p><p id="countSupplierProfiles" class="text-3xl font-extrabold mt-3">—</p></article>
+            <article class="metric rounded-2xl p-5"><p class="muted text-sm">Promociones</p><p id="countSupplierPosts" class="text-3xl font-extrabold mt-3">—</p></article>
           </div>
           <div class="panel rounded-2xl p-5"><h2 class="font-bold text-lg mb-1">Actividad de pagos</h2><p class="muted text-sm mb-4">Solicitudes más recientes registradas en la plataforma.</p><div id="recentPayments"></div></div>
         </div>
@@ -200,7 +202,9 @@
       count('business_devices','countDevices'),
       count('business_subscriptions','countSubscriptions'),
       count('membership_payments','countPayments'),
-      count('membership_plans','countPlans')
+      count('membership_plans','countPlans'),
+      count('supplier_profiles','countSupplierProfiles'),
+      count('supplier_posts','countSupplierPosts')
     ]);
     const {data,error} = await db.from('membership_payments').select('*').order('created_at',{ascending:false}).limit(8);
     if (error) {
@@ -218,7 +222,7 @@
     const canReviewSupplierProfiles = sectionKey === 'supplierProfiles';
     const canReviewSupplierPayments = sectionKey === 'supplierPayments';
     const canReviewSupplierPosts = sectionKey === 'supplierPosts';
-    let out='<table><thead><tr>'+keys.map(k=>'<th>'+cell(k.replaceAll('_',' '))+'</th>').join('')+((canManage || canReviewPayments || canReviewRequests)?'<th>Acciones</th>':'')+'</tr></thead><tbody>';
+    let out='<table><thead><tr>'+keys.map(k=>'<th>'+cell(k.replaceAll('_',' '))+'</th>').join('')+((canManage || canReviewPayments || canReviewRequests || canReviewSupplierProfiles || canReviewSupplierPayments || canReviewSupplierPosts)?'<th>Acciones</th>':'')+'</tr></thead><tbody>';
     out += rows.map(row=>{
       let action='';
       if(canReviewRequests && row.id && row.status === 'pending') {
