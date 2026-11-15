@@ -70,6 +70,9 @@
         <button class="navbtn" data-section="supplierPosts">▤ &nbsp; Promociones</button>
         <button class="navbtn" data-section="supplierReferrals">↗ &nbsp; Referidos WhatsApp</button>
         <button class="navbtn" data-section="supplierSubscriptions">◇ &nbsp; Membresías proveedor</button>
+        <div class="border-t border-emerald-950 my-3"></div>
+        <p class="muted text-[10px] uppercase tracking-[.2em] px-3 py-2">Publicidad VerifyTime</p>
+        <button class="navbtn" data-section="ads">▶ &nbsp; Campañas de video</button>
       </aside>
       <section class="min-w-0">
         <div class="flex flex-wrap items-end justify-between gap-3 mb-6">
@@ -116,7 +119,8 @@
     supplierPayments: {name:'Pagos de proveedores', desc:'Revisión de referencias y activación de membresías de proveedores.', table:'supplier_membership_payments'},
     supplierPosts: {name:'Promociones', desc:'Revisión y publicación de campañas comerciales.', table:'supplier_posts'},
     supplierReferrals: {name:'Referidos WhatsApp', desc:'Negocios que contactaron proveedores desde una publicación.', table:'supplier_referrals'},
-    supplierSubscriptions: {name:'Membresías proveedor', desc:'Vigencia y estado de las membresías de proveedores.', table:'supplier_subscriptions'}
+    supplierSubscriptions: {name:'Membresías proveedor', desc:'Vigencia y estado de las membresías de proveedores.', table:'supplier_subscriptions'},
+    ads: {name:'Campañas de video', desc:'Videos publicitarios que se muestran durante los procesos de Inicio y Cuadre.', table:'platform_ad_campaigns'}
   };
   let currentSection = 'overview';
   let sessionUser = null;
@@ -190,6 +194,115 @@
   });
   $('logoutButton').addEventListener('click', async () => { await db.auth.signOut(); sessionUser=null; $('adminView').classList.add('hidden'); $('loginView').classList.remove('hidden'); $('password').value=''; message('Sesión cerrada.'); });
   $('refreshButton').addEventListener('click', () => currentSection === 'overview' ? loadOverview() : loadTable(currentSection));
+
+  async function loadAds() {
+    $('dataMessage').textContent='Cargando campañas publicitarias…';
+    $('tableTitle').textContent='Campañas de video';
+    $('tableCount').textContent='Administración de anuncios';
+    $('overviewSection').classList.add('hidden');
+    $('tableSection').classList.remove('hidden');
+    const [campaignsResult, eventsResult] = await Promise.all([
+      db.from('platform_ad_campaigns').select('*',{count:'exact'}).order('created_at',{ascending:false}).limit(100),
+      db.from('platform_ad_events').select('campaign_id,event_type').limit(10000)
+    ]);
+    if(campaignsResult.error) {
+      $('tableContent').innerHTML='<p class="text-rose-300 text-sm p-3">No se pudieron cargar las campañas: '+cell(campaignsResult.error.message)+'</p>';
+      $('dataMessage').textContent='Comprueba que la migración de publicidad esté aplicada y que tu cuenta tenga rol maestro.';
+      return;
+    }
+    const counts={};
+    (eventsResult.data||[]).forEach(event=>{
+      const row=counts[event.campaign_id] ||= {impression:0,dismiss:0};
+      if(event.event_type==='impression') row.impression++;
+      if(event.event_type==='dismiss') row.dismiss++;
+    });
+    const rows=campaignsResult.data||[];
+    $('tableCount').textContent=(campaignsResult.count ?? rows.length)+' campañas';
+    const placementLabel=p=>p==='inicio'?'Inicio':'Cuadre de caja';
+    const statusLabel=s=>({draft:'Borrador',active:'Activa',paused:'Pausada',archived:'Archivada'}[s]||s);
+    const cards=rows.map(ad=>{
+      const metric=counts[ad.id]||{impression:0,dismiss:0};
+      const placements=(ad.placements||[]).map(placementLabel).join(' · ');
+      const safeUrl=cell(ad.video_url||'');
+      const action=ad.status==='active'
+        ? '<button class="border border-amber-800 text-amber-200 rounded-lg px-3 py-2 text-xs" data-ad-status="'+cell(ad.id)+'" data-next="paused">Pausar</button>'
+        : '<button class="green rounded-lg px-3 py-2 text-xs font-bold" data-ad-status="'+cell(ad.id)+'" data-next="active">Activar</button>';
+      return '<article class="panel rounded-2xl p-4 mb-3 grid md:grid-cols-[190px_1fr] gap-4">'+
+        '<video class="w-full aspect-video rounded-xl bg-black object-contain" src="'+safeUrl+'" controls muted playsinline preload="metadata"></video>'+
+        '<div class="min-w-0"><div class="flex flex-wrap items-center gap-2 mb-2"><h3 class="font-bold">'+cell(ad.title)+'</h3><span class="text-xs rounded-full px-2 py-1 bg-emerald-950 text-emerald-300">'+statusLabel(ad.status)+'</span></div>'+
+        '<p class="muted text-xs mb-2">'+cell(placements)+' · Prioridad '+cell(ad.priority)+'</p>'+
+        '<p class="text-sm mb-2">'+cell(ad.description||'Sin descripción')+'</p>'+
+        '<p class="muted text-xs mb-3">Desde: '+cell(new Date(ad.starts_at).toLocaleString('es-VE'))+' · Hasta: '+(ad.ends_at?cell(new Date(ad.ends_at).toLocaleString('es-VE')):'Sin fecha de fin')+'</p>'+
+        '<div class="flex flex-wrap items-center gap-3 text-xs mb-3"><span>Reproducciones: <b>'+metric.impression+'</b></span><span>Cierres: <b>'+metric.dismiss+'</b></span></div>'+
+        '<div class="flex flex-wrap gap-2">'+action+'<button class="border border-rose-900 text-rose-300 rounded-lg px-3 py-2 text-xs" data-ad-status="'+cell(ad.id)+'" data-next="archived">Archivar</button></div></div></article>';
+    }).join('');
+    $('tableContent').innerHTML=
+      '<section class="panel rounded-2xl p-4 sm:p-5 mb-5">'+
+      '<div class="mb-4"><h3 class="font-bold text-lg">Nueva campaña publicitaria</h3><p class="muted text-xs mt-1">Carga un video y decide si aparecerá en Inicio, Cuadre o en ambas secciones.</p></div>'+
+      '<form id="adCampaignForm" class="grid md:grid-cols-2 gap-3">'+
+      '<label class="text-sm">Nombre de campaña<input id="adTitle" class="field w-full rounded-xl px-3 py-3 mt-1" maxlength="120" required placeholder="Ej. Promoción de temporada"></label>'+
+      '<label class="text-sm">Empresa anunciante<input id="adAdvertiser" class="field w-full rounded-xl px-3 py-3 mt-1" maxlength="120" placeholder="Nombre de la empresa"></label>'+
+      '<label class="text-sm md:col-span-2">Descripción (opcional)<textarea id="adDescription" class="field w-full rounded-xl px-3 py-3 mt-1" rows="2" maxlength="500" placeholder="Detalle interno de la campaña"></textarea></label>'+
+      '<label class="text-sm md:col-span-2">Video promocional (MP4, MOV o WEBM; máximo 100 MB)<input id="adVideo" class="field w-full rounded-xl px-3 py-3 mt-1" type="file" accept="video/mp4,video/quicktime,video/webm" required></label>'+
+      '<fieldset class="md:col-span-2"><legend class="text-sm mb-2">Dónde se mostrará</legend><div class="flex flex-wrap gap-5 text-sm"><label><input type="checkbox" name="adPlacement" value="inicio" checked> Inicio · consulta de referencia</label><label><input type="checkbox" name="adPlacement" value="cuadre" checked> Cuadre · cierre de caja</label></div></fieldset>'+
+      '<label class="text-sm">Inicio de campaña<input id="adStarts" class="field w-full rounded-xl px-3 py-3 mt-1" type="datetime-local" required></label>'+
+      '<label class="text-sm">Fin de campaña (opcional)<input id="adEnds" class="field w-full rounded-xl px-3 py-3 mt-1" type="datetime-local"></label>'+
+      '<label class="text-sm">Prioridad<input id="adPriority" class="field w-full rounded-xl px-3 py-3 mt-1" type="number" min="0" max="100" value="0"></label>'+
+      '<label class="text-sm">Publicación<select id="adStatus" class="field w-full rounded-xl px-3 py-3 mt-1"><option value="draft">Guardar como borrador</option><option value="active">Activar campaña</option></select></label>'+
+      '<div class="md:col-span-2 flex items-center gap-3"><button id="adSaveButton" class="green rounded-xl px-5 py-3 font-bold" type="submit">Guardar campaña</button><span id="adUploadStatus" class="muted text-xs" role="status"></span></div></form></section>'+
+      '<section><h3 class="font-bold mb-3">Campañas registradas</h3>'+(cards||'<p class="muted text-sm py-4">Todavía no hay campañas publicitarias.</p>')+'</section>';
+    const now=new Date(); now.setMinutes(now.getMinutes()-now.getTimezoneOffset());
+    $('adStarts').value=now.toISOString().slice(0,16);
+    $('adCampaignForm').addEventListener('submit',saveAdCampaign);
+    $('tableContent').querySelectorAll('[data-ad-status]').forEach(button=>button.addEventListener('click',()=>changeAdStatus(button)));
+    $('dataMessage').textContent=eventsResult.error?'Campañas cargadas. No se pudieron consultar las métricas de reproducción.':'Campañas y métricas actualizadas.';
+  }
+
+  async function saveAdCampaign(event) {
+    event.preventDefault();
+    const file=$('adVideo').files?.[0];
+    const placements=[...document.querySelectorAll('input[name="adPlacement"]:checked')].map(x=>x.value);
+    if(!file || !['video/mp4','video/quicktime','video/webm'].includes(file.type)) return $('adUploadStatus').textContent='Selecciona un video MP4, MOV o WEBM.';
+    if(file.size<=0 || file.size>100*1024*1024) return $('adUploadStatus').textContent='El video debe pesar menos de 100 MB.';
+    if(!placements.length) return $('adUploadStatus').textContent='Selecciona al menos una ubicación.';
+    const starts=new Date($('adStarts').value);
+    const ends=$('adEnds').value?new Date($('adEnds').value):null;
+    if(Number.isNaN(starts.getTime()) || (ends && ends<=starts)) return $('adUploadStatus').textContent='Revisa las fechas de la campaña.';
+    const button=$('adSaveButton'); button.disabled=true; button.textContent='Subiendo video…';
+    $('adUploadStatus').textContent='Subiendo video a Supabase Storage…';
+    const safeName=file.name.replace(/[^a-zA-Z0-9._-]/g,'_').slice(-100);
+    const path='campaigns/'+Date.now()+'-'+safeName;
+    const {error:uploadError}=await db.storage.from('platform-ads').upload(path,file,{contentType:file.type,upsert:false});
+    if(uploadError) {
+      button.disabled=false;button.textContent='Guardar campaña';
+      $('adUploadStatus').textContent='No se pudo subir el video: '+uploadError.message;return;
+    }
+    const videoUrl=db.storage.from('platform-ads').getPublicUrl(path).data.publicUrl;
+    button.textContent='Guardando campaña…';
+    const {error}=await db.from('platform_ad_campaigns').insert({
+      title:$('adTitle').value.trim(),description:$('adDescription').value.trim()||null,
+      advertiser_name:$('adAdvertiser').value.trim()||null,video_url:videoUrl,
+      placements,status:$('adStatus').value,starts_at:starts.toISOString(),
+      ends_at:ends?ends.toISOString():null,priority:Number($('adPriority').value)||0
+    });
+    if(error) {
+      await db.storage.from('platform-ads').remove([path]);
+      button.disabled=false;button.textContent='Guardar campaña';
+      $('adUploadStatus').textContent='No se pudo guardar la campaña: '+error.message;return;
+    }
+    $('dataMessage').textContent='Campaña creada correctamente.';
+    await loadAds();
+  }
+
+  async function changeAdStatus(button) {
+    const id=button.dataset.adStatus,next=button.dataset.next;
+    if(!id || !['active','paused','archived'].includes(next)) return;
+    if(!confirm('¿Confirmas cambiar la campaña a '+next+'?')) return;
+    button.disabled=true;
+    const {error}=await db.from('platform_ad_campaigns').update({status:next,updated_at:new Date().toISOString()}).eq('id',id);
+    if(error){button.disabled=false;$('dataMessage').textContent='No se pudo actualizar: '+error.message;return;}
+    await loadAds();
+  }
   async function count(table, id) {
     const {count,error} = await db.from(table).select('*',{count:'exact',head:true});
     if (error) { $(id).textContent='—'; console.warn(table,error.message); return; }
@@ -356,6 +469,7 @@
     if(statusButton) saveAdminStatus(statusButton);
   });
   async function loadTable(key) {
+    if(key==='ads') return loadAds();
     const cfg=tables[key]; if(!cfg) return;
     $('dataMessage').textContent='Cargando '+cfg.name.toLowerCase()+'…';
     $('tableTitle').textContent=cfg.name;
