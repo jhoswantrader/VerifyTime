@@ -231,6 +231,8 @@
         '<video class="w-full aspect-video rounded-xl bg-black object-contain" src="'+safeUrl+'" controls muted playsinline preload="metadata"></video>'+
         '<div class="min-w-0"><div class="flex flex-wrap items-center gap-2 mb-2"><h3 class="font-bold">'+cell(ad.title)+'</h3><span class="text-xs rounded-full px-2 py-1 bg-emerald-950 text-emerald-300">'+statusLabel(ad.status)+'</span></div>'+
         '<p class="muted text-xs mb-2">'+cell(placements)+' · Prioridad '+cell(ad.priority)+'</p>'+
+        (ad.advertiser_name?'<p class="muted text-xs mb-1">Anunciante: '+cell(ad.advertiser_name)+'</p>':'')+
+        (ad.advertiser_contact?'<p class="muted text-xs mb-2">Contacto: '+cell(ad.advertiser_contact)+'</p>':'')+
         '<p class="text-sm mb-2">'+cell(ad.description||'Sin descripción')+'</p>'+
         '<p class="muted text-xs mb-3">Desde: '+cell(new Date(ad.starts_at).toLocaleString('es-VE'))+' · Hasta: '+(ad.ends_at?cell(new Date(ad.ends_at).toLocaleString('es-VE')):'Sin fecha de fin')+'</p>'+
         '<div class="flex flex-wrap items-center gap-3 text-xs mb-3"><span>Reproducciones: <b>'+metric.impression+'</b></span><span>Cierres: <b>'+metric.dismiss+'</b></span></div>'+
@@ -242,6 +244,7 @@
       '<form id="adCampaignForm" class="grid md:grid-cols-2 gap-3">'+
       '<label class="text-sm">Nombre de campaña<input id="adTitle" class="field w-full rounded-xl px-3 py-3 mt-1" maxlength="120" required placeholder="Ej. Promoción de temporada"></label>'+
       '<label class="text-sm">Empresa anunciante<input id="adAdvertiser" class="field w-full rounded-xl px-3 py-3 mt-1" maxlength="120" placeholder="Nombre de la empresa"></label>'+
+      '<label class="text-sm">Contacto del anunciante<input id="adAdvertiserContact" class="field w-full rounded-xl px-3 py-3 mt-1" maxlength="160" placeholder="WhatsApp, teléfono o correo"></label>'+
       '<label class="text-sm md:col-span-2">Descripción (opcional)<textarea id="adDescription" class="field w-full rounded-xl px-3 py-3 mt-1" rows="2" maxlength="500" placeholder="Detalle interno de la campaña"></textarea></label>'+
       '<label class="text-sm md:col-span-2">Video promocional (MP4, MOV o WEBM; máximo 100 MB)<input id="adVideo" class="field w-full rounded-xl px-3 py-3 mt-1" type="file" accept="video/mp4,video/quicktime,video/webm" required></label>'+
       '<fieldset class="md:col-span-2"><legend class="text-sm mb-2">Dónde se mostrará</legend><div class="flex flex-wrap gap-5 text-sm"><label><input type="checkbox" name="adPlacement" value="inicio" checked> Inicio · consulta de referencia</label><label><input type="checkbox" name="adPlacement" value="cuadre" checked> Cuadre · cierre de caja</label></div></fieldset>'+
@@ -281,7 +284,8 @@
     button.textContent='Guardando campaña…';
     const {error}=await db.from('platform_ad_campaigns').insert({
       title:$('adTitle').value.trim(),description:$('adDescription').value.trim()||null,
-      advertiser_name:$('adAdvertiser').value.trim()||null,video_url:videoUrl,
+      advertiser_name:$('adAdvertiser').value.trim()||null,
+      advertiser_contact:$('adAdvertiserContact').value.trim()||null,video_url:videoUrl,
       placements,status:$('adStatus').value,starts_at:starts.toISOString(),
       ends_at:ends?ends.toISOString():null,priority:Number($('adPriority').value)||0
     });
