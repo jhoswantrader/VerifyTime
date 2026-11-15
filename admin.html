@@ -63,6 +63,13 @@
         <button class="navbtn" data-section="requests">▤ &nbsp; Solicitudes</button>
         <button class="navbtn" data-section="devices">▤ &nbsp; Dispositivos</button>
         <button class="navbtn" data-section="audit">≡ &nbsp; Auditoría</button>
+        <div class="border-t border-emerald-950 my-3"></div>
+        <p class="muted text-[10px] uppercase tracking-[.2em] px-3 py-2">Marketplace</p>
+        <button class="navbtn" data-section="supplierProfiles">▣ &nbsp; Proveedores</button>
+        <button class="navbtn" data-section="supplierPayments">⇄ &nbsp; Pagos de proveedores</button>
+        <button class="navbtn" data-section="supplierPosts">▤ &nbsp; Promociones</button>
+        <button class="navbtn" data-section="supplierReferrals">↗ &nbsp; Referidos WhatsApp</button>
+        <button class="navbtn" data-section="supplierSubscriptions">◇ &nbsp; Membresías proveedor</button>
       </aside>
       <section class="min-w-0">
         <div class="flex flex-wrap items-end justify-between gap-3 mb-6">
@@ -102,7 +109,12 @@
     payments: {name:'Pagos', desc:'Solicitudes de pago y resultados de verificación.', table:'membership_payments'},
     requests: {name:'Solicitudes', desc:'Solicitudes de planes, renovaciones y dispositivos adicionales.', table:'membership_change_requests'},
     devices: {name:'Dispositivos', desc:'Dispositivos vinculados a los negocios.', table:'business_devices'},
-    audit: {name:'Auditoría', desc:'Registro de acciones administrativas.', table:'platform_audit_log'}
+    audit: {name:'Auditoría', desc:'Registro de acciones administrativas.', table:'platform_audit_log'},
+    supplierProfiles: {name:'Proveedores', desc:'Empresas proveedoras que solicitaron ingresar al marketplace.', table:'supplier_profiles'},
+    supplierPayments: {name:'Pagos de proveedores', desc:'Revisión de referencias y activación de membresías de proveedores.', table:'supplier_membership_payments'},
+    supplierPosts: {name:'Promociones', desc:'Revisión y publicación de campañas comerciales.', table:'supplier_posts'},
+    supplierReferrals: {name:'Referidos WhatsApp', desc:'Negocios que contactaron proveedores desde una publicación.', table:'supplier_referrals'},
+    supplierSubscriptions: {name:'Membresías proveedor', desc:'Vigencia y estado de las membresías de proveedores.', table:'supplier_subscriptions'}
   };
   let currentSection = 'overview';
   let sessionUser = null;
@@ -203,12 +215,25 @@
     const canManage = sectionKey === 'businesses' || sectionKey === 'devices';
     const canReviewPayments = sectionKey === 'payments';
     const canReviewRequests = sectionKey === 'requests';
+    const canReviewSupplierProfiles = sectionKey === 'supplierProfiles';
+    const canReviewSupplierPayments = sectionKey === 'supplierPayments';
+    const canReviewSupplierPosts = sectionKey === 'supplierPosts';
     let out='<table><thead><tr>'+keys.map(k=>'<th>'+cell(k.replaceAll('_',' '))+'</th>').join('')+((canManage || canReviewPayments || canReviewRequests)?'<th>Acciones</th>':'')+'</tr></thead><tbody>';
     out += rows.map(row=>{
       let action='';
       if(canReviewRequests && row.id && row.status === 'pending') {
          action='<td><div class="flex items-center gap-2"><select class="field rounded-lg px-2 py-2 text-xs" data-request-decision="'+cell(row.id)+'"><option value="approved">Aprobar</option><option value="rejected">Rechazar</option></select><button class="green rounded-lg px-3 py-2 text-xs font-bold" data-request-save="'+cell(row.id)+'">Guardar</button></div></td>';
        } else if(canReviewRequests) action='<td class="muted">Revisada</td>';
+       else if(canReviewSupplierProfiles && row.id && ['pending_review','active','suspended'].includes(row.status)) {
+         const opts = row.status === 'pending_review' ? ['approve','reject'] : row.status === 'active' ? ['suspend'] : ['reactivate'];
+         action='<td><div class="flex flex-col gap-2 min-w-[150px]"><select class="field rounded-lg px-2 py-2 text-xs" data-supplier-profile-decision="'+cell(row.id)+'">'+opts.map(v=>'<option value="'+v+'">'+({approve:'Aprobar',reject:'Rechazar',suspend:'Suspender',reactivate:'Reactivar'}[v])+'</option>').join('')+'</select><input class="field rounded-lg px-2 py-2 text-xs" placeholder="Nota (opcional)" data-supplier-profile-note="'+cell(row.id)+'"><button class="green rounded-lg px-3 py-2 text-xs font-bold" data-supplier-profile-save="'+cell(row.id)+'">Aplicar</button></div></td>';
+       } else if(canReviewSupplierProfiles) action='<td class="muted">Revisado</td>';
+       else if(canReviewSupplierPayments && row.id && ['submitted','pending','verifying'].includes(row.payment_status)) {
+         action='<td><div class="flex items-center gap-2"><select class="field rounded-lg px-2 py-2 text-xs" data-supplier-payment-decision="'+cell(row.id)+'"><option value="approve">Aprobar</option><option value="reject">Rechazar</option></select><button class="green rounded-lg px-3 py-2 text-xs font-bold" data-supplier-payment-save="'+cell(row.id)+'">Guardar</button></div></td>';
+       } else if(canReviewSupplierPayments) action='<td class="muted">Procesado</td>';
+       else if(canReviewSupplierPosts && row.id && row.status === 'pending_review') {
+         action='<td><div class="flex flex-col gap-2 min-w-[150px]"><select class="field rounded-lg px-2 py-2 text-xs" data-supplier-post-decision="'+cell(row.id)+'"><option value="approve">Aprobar y publicar</option><option value="reject">Rechazar</option><option value="archive">Archivar</option></select><input class="field rounded-lg px-2 py-2 text-xs" placeholder="Nota (opcional)" data-supplier-post-note="'+cell(row.id)+'"><button class="green rounded-lg px-3 py-2 text-xs font-bold" data-supplier-post-save="'+cell(row.id)+'">Aplicar</button></div></td>';
+       } else if(canReviewSupplierPosts) action='<td class="muted">Revisada</td>';
        else if(canReviewPayments && row.id && row.payment_status === 'submitted') {
          action='<td><div class="flex items-center gap-2"><select class="field rounded-lg px-2 py-2 text-xs" data-payment-decision="'+cell(row.id)+'"><option value="verified">Aprobar</option><option value="rejected">Rechazar</option><option value="duplicate">Duplicado</option></select><button class="green rounded-lg px-3 py-2 text-xs font-bold" data-payment-save="'+cell(row.id)+'">Guardar</button></div></td>';
        } else if(canReviewPayments) action='<td class="muted">'+(row.payment_status === 'submitted' ? '—' : 'Revisado')+'</td>';
@@ -279,7 +304,46 @@
     $('dataMessage').textContent='Cambio guardado y registrado en auditoría.';
     await loadTable(kind);
   }
+  async function saveSupplierProfileReview(button) {
+    const id=button.dataset.supplierProfileSave, wrap=button.parentElement;
+    const decision=wrap.querySelector('[data-supplier-profile-decision]')?.value;
+    const note=wrap.querySelector('[data-supplier-profile-note]')?.value || '';
+    if(!id || !['approve','reject','suspend','reactivate'].includes(decision)) return;
+    if(!confirm('¿Confirmas '+({approve:'aprobar',reject:'rechazar',suspend:'suspender',reactivate:'reactivar'}[decision])+' este proveedor?')) return;
+    button.disabled=true; button.textContent='Guardando…';
+    const {error}=await db.rpc('platform_admin_review_supplier_profile',{p_supplier_id:id,p_decision:decision,p_note:note});
+    button.disabled=false; button.textContent='Aplicar';
+    if(error){$('dataMessage').textContent='No se pudo revisar el proveedor: '+error.message;return;}
+    $('dataMessage').textContent='Proveedor actualizado correctamente.'; await loadTable('supplierProfiles');
+  }
+  async function saveSupplierPaymentReview(button) {
+    const id=button.dataset.supplierPaymentSave;
+    const decision=button.parentElement.querySelector('[data-supplier-payment-decision]')?.value;
+    if(!id || !['approve','reject'].includes(decision)) return;
+    if(decision==='approve' && !confirm('¿Confirmas que verificaste este Pago Móvil en la fuente bancaria? Al aprobarlo se activarán 30 días de membresía.')) return;
+    button.disabled=true; button.textContent='Guardando…';
+    const {error}=await db.rpc('platform_admin_review_supplier_payment',{p_payment_id:id,p_decision:decision});
+    button.disabled=false; button.textContent='Guardar';
+    if(error){$('dataMessage').textContent='No se pudo revisar el pago: '+error.message;return;}
+    $('dataMessage').textContent=decision==='approve'?'Pago aprobado y membresía de proveedor activada.':'Pago rechazado.';
+    await loadTable('supplierPayments');
+  }
+  async function saveSupplierPostReview(button) {
+    const id=button.dataset.supplierPostSave, wrap=button.parentElement;
+    const decision=wrap.querySelector('[data-supplier-post-decision]')?.value;
+    const note=wrap.querySelector('[data-supplier-post-note]')?.value || '';
+    if(!id || !['approve','reject','archive'].includes(decision)) return;
+    if(decision==='approve' && !confirm('¿Publicar esta promoción en el feed de VerifyTime?')) return;
+    button.disabled=true; button.textContent='Guardando…';
+    const {error}=await db.rpc('platform_admin_review_supplier_post',{p_post_id:id,p_decision:decision,p_note:note});
+    button.disabled=false; button.textContent='Aplicar';
+    if(error){$('dataMessage').textContent='No se pudo revisar la promoción: '+error.message;return;}
+    $('dataMessage').textContent='Promoción actualizada y acción registrada en auditoría.'; await loadTable('supplierPosts');
+  }
   $('tableContent').addEventListener('click',e=>{
+    const sp=e.target.closest('[data-supplier-profile-save]'); if(sp){saveSupplierProfileReview(sp);return;}
+    const pay=e.target.closest('[data-supplier-payment-save]'); if(pay){saveSupplierPaymentReview(pay);return;}
+    const post=e.target.closest('[data-supplier-post-save]'); if(post){saveSupplierPostReview(post);return;}
     const requestButton=e.target.closest('[data-request-save]');
     if(requestButton) { saveRequestReview(requestButton); return; }
     const paymentButton=e.target.closest('[data-payment-save]');
@@ -294,9 +358,13 @@
     $('tableCount').textContent='Últimos 100 registros';
     $('overviewSection').classList.add('hidden');
     $('tableSection').classList.remove('hidden');
-    const query = key === 'requests'
-      ? db.from(cfg.table).select('*, businesses(business_name), membership_plans(display_name)',{count:'exact'})
-      : db.from(cfg.table).select('*',{count:'exact'});
+    let query;
+    if(key === 'requests') query=db.from(cfg.table).select('*, businesses(business_name), membership_plans(display_name)',{count:'exact'});
+    else if(key === 'supplierProfiles') query=db.from(cfg.table).select('*',{count:'exact'});
+    else if(key === 'supplierPayments' || key === 'supplierSubscriptions') query=db.from(cfg.table).select('*, supplier_profiles(company_name,rif)',{count:'exact'});
+    else if(key === 'supplierPosts') query=db.from(cfg.table).select('*, supplier_profiles(company_name,rif)',{count:'exact'});
+    else if(key === 'supplierReferrals') query=db.from(cfg.table).select('*, supplier_profiles(company_name,rif), supplier_posts(title,description), businesses(business_name)',{count:'exact'});
+    else query=db.from(cfg.table).select('*',{count:'exact'});
     const {data,error,count} = await query.order('created_at',{ascending:false}).limit(100);
     if(error) {
       $('tableContent').innerHTML='<p class="text-rose-300 text-sm p-3">No se pudieron consultar estos datos. Comprueba que la tabla exista y que las políticas RLS permitan el acceso al administrador.</p>';
